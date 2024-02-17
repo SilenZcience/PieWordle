@@ -191,12 +191,11 @@ def main(argv) -> int:
         WD.words = words_de
     words = getattr(parameters, 'Words')
     if words:
-        wordle_options = words.split(';')
-        for wordle_option in wordle_options:
+        WD.words = [word.lower() for word in words.split(';')]
+        for wordle_option in WD.words:
             if not wordle_option.isalpha():
                 print('Error: Invalid value for argument -w')
                 return 2
-        WD.words = [wordle_option.lower() for wordle_option in wordle_options]
 
     resize_event = RepeatedTimer(1, check_terminal_size)
     resize_event.start()
