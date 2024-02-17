@@ -5,6 +5,7 @@ import os
 from datetime import datetime as dt
 
 from piewordle.util.data import WordleData, COLOR_GREEN, COLOR_YELLOW, COLOR_RESET
+from piewordle.util.data import ALPHABET
 from piewordle.util.dictionary import words_en, words_de
 from piewordle.util.thread import RepeatedTimer
 
@@ -12,8 +13,8 @@ from piewordle.util.thread import RepeatedTimer
 WD = WordleData(os.get_terminal_size())
 
 
-def println(*args, **kwargs) -> None:
-    print(*args, **kwargs, end='', flush=True)
+def println(*args, end='', **kwargs) -> None:
+    print(*args, **kwargs, end=end, flush=True)
 
 def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int) -> None:
     char_occurence = {letter: 0 for letter in set(wordle)}
@@ -24,16 +25,27 @@ def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int) -
             continue
         if guess_[i] == wordle[i]:
             char_occurence[guess_[i]] += 1
-            guess_[i] = f"{COLOR_GREEN}{guess_[i]}{COLOR_RESET}"
+            WD.guessed[guess_[i]] = f"{COLOR_GREEN}{guess_[i]}{COLOR_RESET}"
+            guess_[i] = WD.guessed[guess_[i]]
     for i in range(wordle_length):
         if guess_[i] in wordle and guess_[i] != wordle[i]:
             char_occurence[guess_[i]] += 1
             if char_occurence[guess_[i]] <= wordle.count(guess_[i]):
+                if WD.guessed[guess_[i]] == guess_[i]: # only make it yellow if it is not green
+                    WD.guessed[guess_[i]] = f"{COLOR_YELLOW}{guess_[i]}{COLOR_RESET}"
                 guess_[i] = f"{COLOR_YELLOW}{guess_[i]}{COLOR_RESET}"
 
     # move to position of guess_count's guess
     println(f"\x1b[{4+2*guess_count};{(WD.t_width-(2*wordle_length))//2 + 1}H")
     println(' '.join(guess_)) # print colored guess
+
+def print_kb() -> None:
+    println(f"\x1b[{WD.t_height-7};0H") # move to display keyboard line
+    split_alphabet = [(0,10), (10,19), (19,26)]
+    if WD.german_words: # append 'üöä' if in german keyboard
+        split_alphabet.append((26,29))
+    for f, t in split_alphabet:
+        println(' '.join([WD.guessed[c] for c in ALPHABET[f:t]]), end='\n')
 
 def reset_msg() -> None:
     println(f"\x1b[{WD.t_height-1};0H") # jump to line before last line
@@ -61,6 +73,7 @@ def init(wordle_length: int) -> None:
     for i in range(WD.allowed_guesses):
         println(f"\x1b[{4+2*i};{x_offset}H") # move to i'th guess position
         println(' '.join('☐' * wordle_length)) # print placeholder for guesses
+    print_kb()
     reset_prompt(wordle_length)
 
 def deinit(event: RepeatedTimer) -> None:
@@ -113,6 +126,7 @@ def play_wordle(wordle: str) -> bool:
         reset_msg() # we reset the errors, because the current guess is valid
         WD.guess_history.append(guess)
         print_guess(wordle, guess, guess_count, wordle_length)
+        print_kb()
         if wordle == guess:
             print_msg(f"Congratulations: You found the Wordle: {wordle}! "
                       'Play again? [y]es/[n]o')
@@ -157,10 +171,8 @@ def main(argv) -> int:
         print('Error: Invalid value for argument -g')
         return 1
     WD.allow_random = getattr(parameters, 'Random')
-    if getattr(parameters, 'DE'):
-        WD.words = words_de
-    else:
-        WD.words = words_en
+    WD.german_words = getattr(parameters, 'DE')
+    WD.words = words_de if WD.german_words else words_en
     words = getattr(parameters, 'Words')
     if words:
         WD.words = [word.lower() for word in words.split(';')]
@@ -174,7 +186,7 @@ def main(argv) -> int:
 
     try:
         while play_wordle(get_wordle(daily)):
-            WD.guess_history.clear()
+            WD.reset()
     except (KeyboardInterrupt, EOFError):
         pass
     try:
