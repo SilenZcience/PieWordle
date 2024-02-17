@@ -3,49 +3,14 @@ import random
 import sys
 import os
 from datetime import datetime as dt
-from threading import Timer
 
-from piewordle.dictionary import words_en, words_de
+from piewordle.util.data import WordleData, COLOR_GREEN, COLOR_YELLOW, COLOR_RESET
+from piewordle.util.dictionary import words_en, words_de
+from piewordle.util.thread import RepeatedTimer
 
-COLOR_RESET  = '\x1b[0m'
-COLOR_YELLOW = '\x1b[3;33m'
-COLOR_GREEN  = '\x1b[4;32m'
 
-class WordleData:
-    def __init__(self) -> None:
-        self.t_width, self.t_height = os.get_terminal_size()
-        self.screen_resized = False
-        self.allowed_guesses = 6
-        self.words = words_en
-        self.allow_random = False
-        self.guess_history = []
+WD = WordleData(os.get_terminal_size())
 
-WD = WordleData()
-
-class RepeatedTimer(object):
-    def __init__(self, interval, function, *args, **kwargs):
-        self._timer = None
-        self.interval = interval
-        self.function = function
-        self.args = args
-        self.kwargs = kwargs
-        self.is_running = False
-
-    def _run(self):
-        self.is_running = False
-        self.start()
-        self.function(*self.args, **self.kwargs)
-
-    def start(self):
-        if not self.is_running:
-            self._timer = Timer(self.interval, self._run)
-            self._timer.start()
-            self.is_running = True
-
-    def cancel(self):
-        self._timer.cancel()
-        self._timer.join()
-        self.is_running = False
 
 def println(*args, **kwargs):
     print(*args, **kwargs, end='', flush=True)
@@ -53,6 +18,7 @@ def println(*args, **kwargs):
 def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int):
     char_occurence = {letter: 0 for letter in set(wordle)}
     guess_ = list(guess)
+    # color guess:
     for i in range(wordle_length):
         if guess_[i] not in wordle:
             continue
@@ -93,7 +59,7 @@ def init(wordle_length: int):
     println('-' * WD.t_width) # display bottom line
     x_offset = (WD.t_width-(2*wordle_length))//2 + 1
     for i in range(WD.allowed_guesses):
-        println(f"\x1b[{4+2*i};{x_offset}H") # move to bottom left
+        println(f"\x1b[{4+2*i};{x_offset}H") # move to i'th guess position
         println(' '.join('☐' * wordle_length)) # print placeholder for guesses
     reset_prompt(wordle_length)
 
@@ -107,8 +73,8 @@ def retry() -> bool:
     return answer.upper() != 'N'
 
 def get_wordle(daily: bool) -> str:
-    if daily:
-        random.seed(int(dt.now().timestamp()//86400))
+    if daily: # set a daily seed
+        random.seed(int(dt.now().timestamp()//86400)) # 24*60*60 == 86400
     return random.choice(WD.words).upper()
 
 def play_wordle(wordle: str) -> bool:
@@ -153,8 +119,7 @@ def play_wordle(wordle: str) -> bool:
 
 def check_terminal_size() -> None:
     width, height = os.get_terminal_size()
-    if not WD.screen_resized and \
-        (width != WD.t_width or height != WD.t_height):
+    if (width != WD.t_width or height != WD.t_height):
         WD.t_width, WD.t_height = width, height
         WD.screen_resized = True
         println('\x1b[2J\x1b[H') # clear screen and move to top left
@@ -189,6 +154,8 @@ def main(argv) -> int:
     WD.allow_random = getattr(parameters, 'Random')
     if getattr(parameters, 'DE'):
         WD.words = words_de
+    else:
+        WD.words = words_en
     words = getattr(parameters, 'Words')
     if words:
         WD.words = [word.lower() for word in words.split(';')]
