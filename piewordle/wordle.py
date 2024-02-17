@@ -167,8 +167,9 @@ def main(argv) -> int:
     daily = getattr(parameters, 'DAILY')
     WD.allowed_guesses = getattr(parameters, 'Guesses')
     if WD.allowed_guesses <= 0 or \
-        WD.allowed_guesses > (WD.t_height-8)//2:
+        WD.allowed_guesses > (WD.t_height-7)//2:
         print('Error: Invalid value for argument -g')
+        print('the screen size might be too small to render')
         return 1
     WD.allow_random = getattr(parameters, 'Random')
     WD.german_words = getattr(parameters, 'DE')
@@ -180,6 +181,11 @@ def main(argv) -> int:
             if not wordle_option.isalpha():
                 print('Error: Invalid value for argument -w')
                 return 2
+
+    if 2*max(map(len, WD.words)) > WD.t_width-40:
+        print('Error:')
+        print('the screen size might be too small to render')
+        return 3
 
     resize_event = RepeatedTimer(1, check_terminal_size)
     resize_event.start()
