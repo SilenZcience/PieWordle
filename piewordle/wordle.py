@@ -12,10 +12,10 @@ from piewordle.util.thread import RepeatedTimer
 WD = WordleData(os.get_terminal_size())
 
 
-def println(*args, **kwargs):
+def println(*args, **kwargs) -> None:
     print(*args, **kwargs, end='', flush=True)
 
-def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int):
+def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int) -> None:
     char_occurence = {letter: 0 for letter in set(wordle)}
     guess_ = list(guess)
     # color guess:
@@ -35,15 +35,15 @@ def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int):
     println(f"\x1b[{4+2*guess_count};{(WD.t_width-(2*wordle_length))//2 + 1}H")
     println(' '.join(guess_)) # print colored guess
 
-def reset_msg():
+def reset_msg() -> None:
     println(f"\x1b[{WD.t_height-1};0H") # jump to line before last line
     println('\x1b[0K') # erase line
 
-def print_msg(msg: str):
+def print_msg(msg: str) -> None:
     reset_msg()
     println(msg) # display msg
 
-def reset_prompt(wordle_length: int):
+def reset_prompt(wordle_length: int) -> None:
     println(f"\x1b[{WD.t_height-2};0H") # move to prompt line
     println('\x1b[0K') # erase line
     println('> ') # display prompt symbol
@@ -51,7 +51,7 @@ def reset_prompt(wordle_length: int):
     println('_' * wordle_length) # display empty prompt
     println('\x1b[u') # jump to saved position
 
-def init(wordle_length: int):
+def init(wordle_length: int) -> None:
     println('\x1b[2J\x1b[H') # clear screen and move to top left
     println('-' * ((WD.t_width-6)//2), 'WORDLE',
             '-' * ((WD.t_width-6)//2), sep='') # display header
@@ -63,7 +63,7 @@ def init(wordle_length: int):
         println(' '.join('☐' * wordle_length)) # print placeholder for guesses
     reset_prompt(wordle_length)
 
-def deinit(event: RepeatedTimer):
+def deinit(event: RepeatedTimer) -> None:
     println('\x1b[2J\x1b[H') # clear screen and move to top left
     event.cancel()
 
@@ -86,17 +86,22 @@ def play_wordle(wordle: str) -> bool:
 
     while guess_count < WD.allowed_guesses:
         if WD.screen_resized:
+            # if the screen has been resized
+            # rerender everything
             WD.screen_resized = False
             init(wordle_length)
+            # including the old guesses
             for i, g in enumerate(WD.guess_history):
                 print_guess(wordle, g, i, wordle_length)
         reset_prompt(wordle_length)
-        println(input_buffer)
-        guess = input()
+        println(input_buffer) # in case the resize interrupted the prompt
+        guess = input() # main prompt
         if WD.screen_resized:
+            # if the resize thread prompted to press enter
+            # we buffer the input
             input_buffer = guess
             continue
-        guess = input_buffer + guess
+        guess = input_buffer + guess # in case the buffer was not empty
         input_buffer = ''
         if len(guess) != wordle_length:
             print_msg(f"ERROR: The wordle has {wordle_length} letters!")
@@ -105,7 +110,7 @@ def play_wordle(wordle: str) -> bool:
             print_msg(f"ERROR: Unknown word: {guess}")
             continue
         guess = guess.upper()
-        reset_msg()
+        reset_msg() # we reset the errors, because the current guess is valid
         WD.guess_history.append(guess)
         print_guess(wordle, guess, guess_count, wordle_length)
         if wordle == guess:
