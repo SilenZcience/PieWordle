@@ -1,5 +1,5 @@
 import sys
-from wordle.wordle import main
+from piewordle.wordle import main
 
 def entry_point():
     """entry_point"""

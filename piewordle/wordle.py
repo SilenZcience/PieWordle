@@ -5,7 +5,7 @@ import os
 from datetime import datetime as dt
 from threading import Timer
 
-from wordle.dictionary import words_en, words_de
+from piewordle.dictionary import words_en, words_de
 
 COLOR_RESET  = '\x1b[0m'
 COLOR_YELLOW = '\x1b[3;33m'
