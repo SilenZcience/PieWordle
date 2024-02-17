@@ -1,0 +1,54 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "piewordle"
+requires-python = ">=3.7"
+authors = [{name = "Silas A. Kraume", email = "silas.kraume1552@gmail.com"}]
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = [
+    "games",
+    "wordle",
+    "word games",
+    "english",
+    "german",
+    "CUI",
+    "crossplatform",
+    "python",
+    "terminal",
+]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Environment :: Console",
+    "Operating System :: OS Independent",
+    "Topic :: Terminals",
+]
+dynamic = [
+    "version",
+    "description",
+]
+dependencies = [
+]
+
+[tool.flit.sdist]
+exclude = [
+]
+
+[project.scripts]
+pwordle = "piewordle.__main__:entry_point"
+
+[project.urls]
+Github = "https://github.com/SilenZcience/PieWordle"
+Download = "https://github.com/SilenZcience/PieWordle/tarball/master"
+Tracker = "hhttps://github.com/SilenZcience/PieWordle/issues"
