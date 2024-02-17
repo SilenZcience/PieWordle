@@ -51,4 +51,4 @@ pwordle = "piewordle.__main__:entry_point"
 [project.urls]
 Github = "https://github.com/SilenZcience/PieWordle"
 Download = "https://github.com/SilenZcience/PieWordle/tarball/master"
-Tracker = "hhttps://github.com/SilenZcience/PieWordle/issues"
+Tracker = "https://github.com/SilenZcience/PieWordle/issues"
