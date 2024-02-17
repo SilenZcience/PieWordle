@@ -17,6 +17,7 @@ class WordleData:
         self.screen_resized = False
         self.allowed_guesses = 6
         self.words = words_en
+        self.allow_random = False
         self.guess_history = []
 
 WD = WordleData()
@@ -134,7 +135,7 @@ def play_wordle(wordle: str) -> bool:
         if len(guess) != wordle_length:
             print_msg(f"ERROR: The wordle has {wordle_length} letters!")
             continue
-        if guess.lower() not in WD.words:
+        if guess.lower() not in WD.words and not WD.allow_random:
             print_msg(f"ERROR: Unknown word: {guess}")
             continue
         guess = guess.upper()
@@ -167,6 +168,9 @@ def main(argv) -> int:
     argparser.add_argument('-g', action='store', default=6,
                            metavar='GUESSES', dest='Guesses', type=int,
                            help='define the amount of guesses the player has. default is 6.')
+    argparser.add_argument('-?', action='store_const', default=False,
+                           const=True, dest='Random',
+                           help='allow not existing words.')
     argparser.add_argument('--de', action='store_const', default=False,
                            const=True, dest='DE',
                            help='use german words.')
@@ -182,6 +186,7 @@ def main(argv) -> int:
         WD.allowed_guesses > (WD.t_height-8)//2:
         print('Error: Invalid value for argument -g')
         return 1
+    WD.allow_random = getattr(parameters, 'Random')
     if getattr(parameters, 'DE'):
         WD.words = words_de
     words = getattr(parameters, 'Words')
