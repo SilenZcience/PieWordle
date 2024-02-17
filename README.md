@@ -22,7 +22,7 @@
    <p align="center">
       A Recreation of Wordle in Python.
       <br/>
-      <a href="https://github.com/SilenZcience/PieWordle/blob/main/wordle/wordle.py">
+      <a href="https://github.com/SilenZcience/PieWordle/blob/main/piewordle/wordle.py">
          <strong>Explore the code »</strong>
       </a>
       <br/>
