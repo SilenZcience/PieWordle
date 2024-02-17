@@ -7,7 +7,7 @@
    <a href="https://pypi.org/project/piewordle/" alt="Visitors">
       <img src="https://visitor-badge.laobi.icu/badge?page_id=SilenZcience.PieWordle&right_color=orange" align="right">
    </a>
-   <a href="https://github.com/SilenZcience/PieWordle/tree/main/wordle" alt="CodeSize">
+   <a href="https://github.com/SilenZcience/PieWordle/tree/main/piewordle" alt="CodeSize">
       <img src="https://img.shields.io/github/languages/code-size/SilenZcience/PieWordle?color=purple" align="right">
    </a>
 </p>
