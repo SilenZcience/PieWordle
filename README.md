@@ -94,6 +94,12 @@ Simply install the python package (via [PyPI-piewordle](https://pypi.org/project
 python -m pip install --upgrade piewordle
 ```
 
+**OR alternatively** you can use the compiled version (*`Windows only`*):
+
+Simply download the [pwordle.exe](https://raw.githubusercontent.com/SilenZcience/PieWordle/main/bin/pwordle.exe) file.
+
+> Update the ./bin/pwordle.version file and run: ```pyinstaller ./piewordle/__main__.py --onefile --clean --dist ./bin --version-file ./bin/pwordle.version -n pwordle```.
+
 <p align="right">(<a href="#top">back to top</a>)</p>
 <div id="usage"></div>
 
