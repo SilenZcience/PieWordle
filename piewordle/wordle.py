@@ -8,10 +8,27 @@ from piewordle.util.data import WordleData, COLOR_GREEN, COLOR_YELLOW, COLOR_RES
 from piewordle.util.data import ALPHABET
 from piewordle.util.dictionary import words_en, words_de
 from piewordle.util.thread import RepeatedTimer
-
+from piewordle import __version__, __sysversion__, __author__
 
 WD = WordleData(os.get_terminal_size())
 
+
+def print_version() -> None:
+    working_dir = os.path.dirname(os.path.realpath(__file__))
+    piewordle_version = f"PieWordle {__version__} - from {working_dir}\n"
+    version_message = '\n'
+    version_message += '-' * len(piewordle_version) + '\n'
+    version_message += piewordle_version
+    version_message += '-' * len(piewordle_version) + '\n'
+    version_message += '\n'
+    version_message += f"Built with: \tPython {__sysversion__}\n"  # sys.version
+    try:
+        time_stamp = dt.fromtimestamp(os.path.getctime(os.path.realpath(__file__)))
+        version_message += f"Install time: \t{time_stamp}\n"
+    except OSError:
+        version_message += 'Install time: \t-\n'
+    version_message += f"Author: \t{__author__}\n"
+    print(version_message)  
 
 def println(*args, end='', **kwargs) -> None:
     print(*args, **kwargs, end=end, flush=True)
@@ -146,8 +163,11 @@ def check_terminal_size() -> None:
 
 def main(argv) -> int:
     argparser = argparse.ArgumentParser()
+    argparser.add_argument('-v','--version', action='store_const', default=False,
+                           const=True, dest='Version',
+                           help='show the current version.')
     argparser.add_argument('--daily', action='store_const', default=False,
-                           const=True, dest='DAILY',
+                           const=True, dest='Daily',
                            help='guess the daily wordle.')
     argparser.add_argument('-g', action='store', default=6,
                            metavar='GUESSES', dest='Guesses', type=int,
@@ -164,7 +184,10 @@ def main(argv) -> int:
 
     parameters = argparser.parse_args(argv[1:])
 
-    daily = getattr(parameters, 'DAILY')
+    if getattr(parameters, 'Version'):
+        print_version()
+        return 0
+    daily = getattr(parameters, 'Daily')
     WD.allowed_guesses = getattr(parameters, 'Guesses')
     if WD.allowed_guesses <= 0 or \
         WD.allowed_guesses > (WD.t_height-7)//2:
