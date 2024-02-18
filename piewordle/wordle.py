@@ -4,8 +4,7 @@ import sys
 import os
 from datetime import datetime as dt
 
-from piewordle.util.data import WordleData, COLOR_GREEN, COLOR_YELLOW, COLOR_RESET
-from piewordle.util.data import ALPHABET
+from piewordle.util.data import WordleData, ANSI, ALPHABET
 from piewordle.util.dictionary import words_en, words_de
 from piewordle.util.thread import RepeatedTimer
 from piewordle import __version__, __sysversion__, __author__
@@ -39,25 +38,25 @@ def print_guess(wordle: str, guess: str, guess_count: int, wordle_length: int) -
     # color guess:
     for i in range(wordle_length):
         if guess_[i] not in wordle:
-            continue
-        if guess_[i] == wordle[i]:
+            WD.guessed[guess_[i]] = f"{ANSI.COLOR_DARK}{guess_[i]}{ANSI.RESET}"
+        elif guess_[i] == wordle[i]:
             char_occurence[guess_[i]] += 1
-            WD.guessed[guess_[i]] = f"{COLOR_GREEN}{guess_[i]}{COLOR_RESET}"
+            WD.guessed[guess_[i]] = f"{ANSI.COLOR_GREEN}{guess_[i]}{ANSI.RESET}"
             guess_[i] = WD.guessed[guess_[i]]
     for i in range(wordle_length):
         if guess_[i] in wordle and guess_[i] != wordle[i]:
             char_occurence[guess_[i]] += 1
             if char_occurence[guess_[i]] <= wordle.count(guess_[i]):
                 if WD.guessed[guess_[i]] == guess_[i]: # only make it yellow if it is not green
-                    WD.guessed[guess_[i]] = f"{COLOR_YELLOW}{guess_[i]}{COLOR_RESET}"
-                guess_[i] = f"{COLOR_YELLOW}{guess_[i]}{COLOR_RESET}"
+                    WD.guessed[guess_[i]] = f"{ANSI.COLOR_YELLOW}{guess_[i]}{ANSI.RESET}"
+                guess_[i] = f"{ANSI.COLOR_YELLOW}{guess_[i]}{ANSI.RESET}"
 
     # move to position of guess_count's guess
-    println(f"\x1b[{4+2*guess_count};{(WD.t_width-(2*wordle_length))//2 + 1}H")
+    println(ANSI.XY_POS % (4+2*guess_count, (WD.t_width-(2*wordle_length))//2 + 1))
     println(' '.join(guess_)) # print colored guess
 
 def print_kb() -> None:
-    println(f"\x1b[{WD.t_height-7};0H") # move to display keyboard line
+    println(ANSI.XY_POS % (WD.t_height-7, 0)) # move to display keyboard line
     split_alphabet = [(0,10), (10,19), (19,26)]
     if WD.german_words: # append 'üöä' if in german keyboard
         split_alphabet.append((26,29))
@@ -65,41 +64,50 @@ def print_kb() -> None:
         println(' '.join([WD.guessed[c] for c in ALPHABET[f:t]]), end='\n')
 
 def reset_msg() -> None:
-    println(f"\x1b[{WD.t_height-1};0H") # jump to line before last line
-    println('\x1b[0K') # erase line
+    println(ANSI.XY_POS % (WD.t_height-1, 0)) # jump to line before last line
+    println(ANSI.ERASE_LINE)
 
 def print_msg(msg: str) -> None:
     reset_msg()
-    println(msg) # display msg
+    println(msg)
 
 def reset_prompt(wordle_length: int) -> None:
-    println(f"\x1b[{WD.t_height-2};0H") # move to prompt line
-    println('\x1b[0K') # erase line
-    println('> ') # display prompt symbol
-    println('\x1b[s') # save prompt position
-    println('_' * wordle_length) # display empty prompt
-    println('\x1b[u') # jump to saved position
+    println(ANSI.XY_POS % (WD.t_height-2, 0)) # move to prompt line
+    println(ANSI.ERASE_LINE)
+    println('> ')
+    println(ANSI.SAVE_POS)
+    println(ANSI.UNDERLINE)
+    println(' ' * wordle_length)
+    println(ANSI.RESET)
+    println(ANSI.RESET_POS)
 
 def init(wordle_length: int) -> None:
-    println('\x1b[2J\x1b[H') # clear screen and move to top left
+    println(ANSI.ERASE_SCREEN)
+    println(ANSI.START_POS)
     println('-' * ((WD.t_width-6)//2), 'WORDLE',
             '-' * ((WD.t_width-6)//2), sep='') # display header
-    println(f"\x1b[{WD.t_height};0H") # move to bottom left
+    println(ANSI.XY_POS % (WD.t_height, 0)) # move to bottom left
     println('-' * WD.t_width) # display bottom line
     x_offset = (WD.t_width-(2*wordle_length))//2 + 1
     for i in range(WD.allowed_guesses):
-        println(f"\x1b[{4+2*i};{x_offset}H") # move to i'th guess position
+        println(ANSI.XY_POS % (4+2*i, x_offset)) # move to i'th guess position
         println(' '.join('☐' * wordle_length)) # print placeholder for guesses
     print_kb()
     reset_prompt(wordle_length)
 
 def deinit(event: RepeatedTimer) -> None:
-    println('\x1b[2J\x1b[H') # clear screen and move to top left
+    # clear everything and reset styles
+    println(ANSI.ERASE_SCREEN)
+    println(ANSI.START_POS)
+    println(ANSI.RESET)
+    # cancel resize event thread
     event.cancel()
 
 def retry() -> bool:
     reset_prompt(1)
+    println(ANSI.UNDERLINE)
     answer = input()[:1]
+    println(ANSI.RESET)
     return answer.upper() != 'N'
 
 def get_wordle(daily: bool) -> str:
@@ -124,8 +132,10 @@ def play_wordle(wordle: str) -> bool:
             for i, g in enumerate(WD.guess_history):
                 print_guess(wordle, g, i, wordle_length)
         reset_prompt(wordle_length)
+        println(ANSI.UNDERLINE) # underline prompt
         println(input_buffer) # in case the resize interrupted the prompt
         guess = input() # main prompt
+        println(ANSI.RESET) # reset styles (underline)
         if WD.screen_resized:
             # if the resize thread prompted to press enter
             # we buffer the input
@@ -158,10 +168,14 @@ def check_terminal_size() -> None:
     if (width != WD.t_width or height != WD.t_height):
         WD.t_width, WD.t_height = width, height
         WD.screen_resized = True
-        println('\x1b[2J\x1b[H') # clear screen and move to top left
+        # display screen-resize-event message
+        println(ANSI.ERASE_SCREEN)
+        println(ANSI.START_POS)
+        println(ANSI.RESET)
         println('Screen Resize has been detected. Press Enter to rerender the screen.')
 
 def main(argv) -> int:
+    # define arguments
     argparser = argparse.ArgumentParser()
     argparser.add_argument('-v','--version', action='store_const', default=False,
                            const=True, dest='Version',
@@ -184,6 +198,7 @@ def main(argv) -> int:
 
     parameters = argparser.parse_args(argv[1:])
 
+    # handle arguments
     if getattr(parameters, 'Version'):
         print_version()
         return 0
@@ -210,6 +225,7 @@ def main(argv) -> int:
         print('the screen size might be too small to render')
         return 3
 
+    # init thread to handle screen resize event
     resize_event = RepeatedTimer(1, check_terminal_size)
     resize_event.start()
 
@@ -219,7 +235,7 @@ def main(argv) -> int:
     except (KeyboardInterrupt, EOFError):
         pass
     try:
-        deinit(resize_event)
+        deinit(resize_event) # interrupts on pypy versions
     except KeyboardInterrupt:
         resize_event.cancel()
     return 0
