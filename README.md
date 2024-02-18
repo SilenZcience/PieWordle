@@ -111,12 +111,13 @@ pwordle [OPTION]...
 
 ```console
 options:
-  -h, --help  show this help message and exit
-  --daily     guess the daily wordle.
-  -g GUESSES  define the amount of guesses the player has. default is 6.
-  -?          allow not existing words.
-  --de        use german words.
-  -w WORDS    define custom wordle options. Seperator is ';'.
+  -h, --help     show this help message and exit
+  -v, --version  show the current version.
+  --daily        guess the daily wordle.
+  -g GUESSES     define the amount of guesses the player has. default is 6.
+  -?             allow not existing words.
+  --de           use german words.
+  -w WORDS       define custom wordle options. Seperator is ';'.
 ```
 
 <div id="examples"></div>
