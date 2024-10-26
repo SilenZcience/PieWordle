@@ -160,7 +160,7 @@ This project is licensed under the MIT License - see the [LICENSE](https://githu
 
 
 [MadeWith-Python]: https://img.shields.io/badge/Made%20with-Python-brightgreen
-[Python-Version]: https://img.shields.io/badge/Python-3.7%20--%203.12%20%7C%20pypy--3.7%20--%20pypy--3.10-blue
+[Python-Version]: https://img.shields.io/badge/Python-3.7%20--%203.13%20%7C%20pypy--3.7%20--%20pypy--3.10-blue
 
 [CurrentVersion]: https://img.shields.io/pypi/v/piewordle.svg
 
