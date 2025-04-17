@@ -5,7 +5,7 @@
       <img src="https://static.pepy.tech/personalized-badge/piewordle?period=total&units=international_system&left_color=grey&right_color=blue&left_text=Downloads" align="right">
    </a>
    <a href="https://pypi.org/project/piewordle/" alt="Visitors">
-      <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2FSilenZcience%2FPieWordle&count_bg=%23FF7700&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=Visitors&edge_flat=false" align="right">
+      <img src="https://hitscounter.dev/api/hit?url=https%3A%2F%2Fgithub.com%2FSilenZcience%2FPieWordle&label=Visitors&icon=person-circle&color=%23479f76" align="right">
    </a>
    <a href="https://github.com/SilenZcience/PieWordle/tree/main/piewordle" alt="CodeSize">
       <img src="https://img.shields.io/github/languages/code-size/SilenZcience/PieWordle?color=purple" align="right">
